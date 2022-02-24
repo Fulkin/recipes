@@ -23,7 +23,7 @@ import java.util.List;
 public class Recipe {
     @Id
     @JsonIgnore
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
 
@@ -65,6 +65,7 @@ public class Recipe {
     @Size(min = 1)
     @Column(name = "directions")
     private List<String> directions;
+
 
     public Recipe(String name, String category, String description, List<String> ingredients, List<String> directions) {
         this.name = name;

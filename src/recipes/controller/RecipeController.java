@@ -10,7 +10,6 @@ import recipes.businesslayer.Recipe;
 import recipes.businesslayer.RecipeService;
 
 import javax.validation.Valid;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,10 +41,10 @@ public class RecipeController {
         return recipeById.get();
     }
 
-    @GetMapping(value = "/api/recipe/search")
+    @GetMapping("/api/recipe/search")
     List<Recipe> getCategoryListRecipes(
-            @RequestParam (value = "category", required = false) String category,
-            @RequestParam (value = "name", required = false) String name
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "name", required = false) String name
     ) {
         if (category != null && name == null) {
             return recipeService.getCategoryList(category);
