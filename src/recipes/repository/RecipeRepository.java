@@ -1,8 +1,8 @@
-package recipes.persistencelayer;
+package recipes.repository;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import recipes.businesslayer.Recipe;
+import recipes.bean.Recipe;
 
 import java.util.List;
 
@@ -14,5 +14,6 @@ import java.util.List;
 @Repository
 public interface RecipeRepository extends CrudRepository<Recipe, Long> {
     List<Recipe> findByCategoryIgnoreCaseOrderByDateDesc(String category);
+
     List<Recipe> findByNameContainsIgnoreCaseOrderByDateDesc(String name);
 }

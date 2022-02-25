@@ -1,13 +1,15 @@
 package recipes.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import recipes.security.User;
-import recipes.security.UserRepository;
+import org.springframework.web.server.ResponseStatusException;
+import recipes.bean.User;
+import recipes.service.UserService;
 
 import javax.validation.Valid;
 
@@ -21,15 +23,18 @@ import javax.validation.Valid;
 public class RegistrationController {
 
     @Autowired
-    UserRepository userRepo;
+    UserService userService;
 
     @Autowired
     PasswordEncoder encoder;
 
     @PostMapping("/api/register")
-    public void register(@RequestBody @Valid User user) {
+    void register(@RequestBody @Valid User user) {
+        if (userService.getUserByEmail(user.getEmail()) != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This email already authenticated");
+        }
         user.setPassword(encoder.encode(user.getPassword()));
         user.setRole("ROLE_USER");
-        userRepo.save(user);
+        userService.save(user);
     }
 }

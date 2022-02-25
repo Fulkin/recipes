@@ -25,8 +25,7 @@ public class WebSecurityConfigurerImpl extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .mvcMatchers("/api/register").permitAll()
-                .mvcMatchers(HttpMethod.POST,"/api/register").permitAll()
+                .mvcMatchers(HttpMethod.POST, "/api/register", "/actuator/shutdown").permitAll()
                 .anyRequest().hasRole("USER")
                 .and()
                 .csrf().disable().headers().frameOptions().disable()

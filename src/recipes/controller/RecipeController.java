@@ -2,12 +2,15 @@ package recipes.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import recipes.businesslayer.Recipe;
-import recipes.businesslayer.RecipeService;
+import recipes.bean.Recipe;
+import recipes.bean.User;
+import recipes.service.RecipeService;
+import recipes.service.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -21,18 +24,27 @@ import java.util.Optional;
 
 @RestController
 @Validated
+@RequestMapping("/api/recipe")
 public class RecipeController {
 
     @Autowired
     RecipeService recipeService;
 
-    @PostMapping("/api/recipe/new")
-    Map<String, Long> setRecipe(@Valid @RequestBody Recipe recipe) {
+    @Autowired
+    UserService userService;
+
+    @PostMapping("/new")
+    Map<String, Long> setRecipe(
+            @Valid @RequestBody Recipe recipe,
+            @AuthenticationPrincipal UserDetails details
+    ) {
+        User user = userService.getUserByEmail(details.getUsername());
+        recipe.setUserCreate(user);
         long id = recipeService.saveRecipe(recipe);
         return Map.of("id", id);
     }
 
-    @GetMapping("/api/recipe/{id}")
+    @GetMapping("/{id}")
     Recipe getRecipe(@PathVariable int id) {
         Optional<Recipe> recipeById = recipeService.getRecipeById(id);
         if (recipeById.isEmpty()) {
@@ -41,7 +53,7 @@ public class RecipeController {
         return recipeById.get();
     }
 
-    @GetMapping("/api/recipe/search")
+    @GetMapping("/search")
     List<Recipe> getCategoryListRecipes(
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "name", required = false) String name
@@ -55,23 +67,40 @@ public class RecipeController {
         }
     }
 
-    @PutMapping("/api/recipe/{id}")
+    @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void updateRecipe(@Valid @PathVariable long id, @Valid @RequestBody Recipe recipe) {
+    void updateRecipe(
+            @Valid @PathVariable long id,
+            @Valid @RequestBody Recipe recipe,
+            @AuthenticationPrincipal UserDetails details
+    ) {
         Optional<Recipe> recipeById = recipeService.getRecipeById(id);
         if (recipeById.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+        String recipeBy = recipeById.get().getUserCreate().getEmail();
+        if (!recipeBy.equals(details.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+        User user = userService.getUserByEmail(details.getUsername());
+        recipe.setUserCreate(user);
         recipeService.saveRecipe(recipe, id);
     }
 
-    @DeleteMapping("/api/recipe/{id}")
-    ResponseEntity<?> deleteRecipe(@Valid @PathVariable long id) {
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteRecipe(
+            @Valid @PathVariable long id,
+            @AuthenticationPrincipal UserDetails details
+    ) {
         Optional<Recipe> recipeById = recipeService.getRecipeById(id);
         if (recipeById.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+        String recipeBy = recipeById.get().getUserCreate().getEmail();
+        if (!recipeBy.equals(details.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
         recipeService.deleteRecipeById(id);
-        return ResponseEntity.noContent().build();
     }
 }

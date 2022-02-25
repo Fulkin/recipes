@@ -1,8 +1,9 @@
-package recipes.businesslayer;
+package recipes.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedBy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -38,7 +39,6 @@ public class Recipe {
     private String category;
 
     @Column(name = "date")
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private LocalDateTime date;
 
     @NotNull
@@ -52,7 +52,7 @@ public class Recipe {
             name = "ingredients",
             joinColumns = @JoinColumn(name = "id")
     )
-    @Size(min = 1)
+    @Size(min = 1, message = "Provide at least 1 ingredient")
     @Column(name = "ingredients")
     private List<String> ingredients;
 
@@ -62,10 +62,15 @@ public class Recipe {
             name = "directions",
             joinColumns = @JoinColumn(name = "id")
     )
-    @Size(min = 1)
+    @Size(min = 1, message = "Provide at least 1 direction")
     @Column(name = "directions")
     private List<String> directions;
 
+    @LastModifiedBy
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "added_by", nullable = false)
+    private User userCreate;
 
     public Recipe(String name, String category, String description, List<String> ingredients, List<String> directions) {
         this.name = name;

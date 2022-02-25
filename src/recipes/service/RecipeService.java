@@ -1,8 +1,9 @@
-package recipes.businesslayer;
+package recipes.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import recipes.persistencelayer.RecipeRepository;
+import recipes.bean.Recipe;
+import recipes.repository.RecipeRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
